@@ -24,4 +24,4 @@ def create_doc(row):
 df.foreach(create_doc)
 
 
-# df.write.csv("/index/data", sep = "\t")
+df.write.csv("/index/data", sep = "\t")
