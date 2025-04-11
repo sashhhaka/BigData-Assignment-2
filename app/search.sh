@@ -1,8 +1,35 @@
 #!/bin/bash
 echo "This script will include commands to search for documents given the query using Spark RDD"
+#!/bin/bash
+# search.sh: Submit the BM25 Query Ranking application on a YARN cluster.
+# Usage: ./search.sh "your query string"
+# Check if the query argument is provided.
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 \"your query string\""
+    exit 1
+fi
+QUERY="$1"
+echo "Starting search for query: \"$QUERY\""
+# Activate the virtual environment.
 source .venv/bin/activate
-# Python of the driver (/app/.venv/bin/python)
+# Set Python interpreter paths for Spark (driver and executors).
 export PYSPARK_DRIVER_PYTHON=$(which python)
-# Python of the excutor (./.venv/bin/python)
 export PYSPARK_PYTHON=./.venv/bin/python
-spark-submit --master yarn --archives /app/.venv.tar.gz#.venv query.py  $1
+# Submit the Spark job in cluster mode on YARN.
+
+# Check if HDFS is in safe mode
+SAFEMODE_STATUS=$(hdfs dfsadmin -safemode get 2>/dev/null)
+if [[ $SAFEMODE_STATUS == *"ON"* ]]; then
+    echo "HDFS is in safe mode. Forcing exit..."
+    hdfs dfsadmin -safemode forceExit
+fi
+
+spark-submit \
+    --master yarn \
+    --deploy-mode cluster \
+    --archives .venv.tar.gz#.venv \
+    --conf spark.yarn.appMasterEnv.PYSPARK_PYTHON=./.venv/bin/python \
+    --conf spark.executorEnv.PYSPARK_PYTHON=./.venv/bin/python \
+    --packages com.datastax.spark:spark-cassandra-connector_2.12:3.0.0 \
+    query.py "$QUERY"
+
