@@ -133,28 +133,28 @@ def load_data_to_cassandra(session, pipeline1_output, pipeline2_output):
 
 
 def verify_cassandra_tables(session):
-    """Проверяет, что таблицы Cassandra успешно созданы"""
-    print("Проверка таблиц Cassandra...")
+    """Verifies that Cassandra tables were successfully created"""
+    print("Checking Cassandra tables...")
     try:
         tables = session.execute("SELECT table_name FROM system_schema.tables WHERE keyspace_name='bigdata'")
-        print("Существующие таблицы в keyspace 'bigdata':")
+        print("Existing tables in keyspace 'bigdata':")
         table_names = []
         for table in tables:
             table_names.append(table.table_name)
             print(f"- {table.table_name}")
 
-        # Проверяем, что все необходимые таблицы созданы
+        # Check that all required tables are created
         required_tables = ["inverted_index", "vocabulary", "doc_stats"]
         missing_tables = [t for t in required_tables if t not in table_names]
 
         if missing_tables:
-            print(f"ВНИМАНИЕ: Отсутствуют таблицы: {', '.join(missing_tables)}")
+            print(f"WARNING: Missing tables: {', '.join(missing_tables)}")
             return False
         else:
-            print("Все необходимые таблицы успешно созданы!")
+            print("All required tables successfully created!")
             return True
     except Exception as e:
-        print(f"Ошибка при проверке таблиц Cassandra: {e}")
+        print(f"Error checking Cassandra tables: {e}")
         return False
 
 

@@ -1,11 +1,11 @@
 #!/bin/bash
-echo "Проверка окружения MapReduce:"
-echo "Python версия:"
+echo "Checking MapReduce environment:"
+echo "Python version:"
 python3 --version
-echo "Содержимое папки mapreduce:"
+echo "Contents of the mapreduce folder:"
 ls -la mapreduce/
 INPUT_PATH=${1:-/index/data}
-echo "Проверка доступности входных данных:"
+echo "Checking availability of input data:"
 hdfs dfs -ls $INPUT_PATH | head -10
 # Define temporary output directories for the two pipelines.
 PIPELINE1_OUTPUT=/tmp/mapreduce_pipeline1_output
