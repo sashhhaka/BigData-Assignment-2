@@ -13,8 +13,8 @@ venv-pack -o .venv.tar.gz
 # Init Cassandra
 #python app.py
 # Collect data
-bash prepare_data.sh
+#bash prepare_data.sh
 # Run the indexer
-bash index.sh "/index/data"
+#bash index.sh "/index/data"
 # Run the ranker
 bash search.sh "this is a query!"
