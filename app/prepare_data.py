@@ -2,6 +2,9 @@
 from pathvalidate import sanitize_filename
 from tqdm import tqdm
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+import re
 
 
 spark = SparkSession.builder \
@@ -20,6 +23,21 @@ df = spark.read.parquet("/a.parquet")
 n = 1000
 df = df.select(['id', 'title', 'text']).sample(fraction=100 * n / df.count(), seed=0).limit(n)
 
+def clean_text(text):
+    if not text:
+        return ""
+    return re.sub(r'\s+', ' ', text).strip()
+
+def normalize_text(text):
+    if not text:
+        return text
+    return re.sub(r'\s+', ' ', text).strip()
+
+# Register the UDF
+normalize_udf = udf(clean_text, StringType())
+
+# Apply normalization to title column
+df = df.withColumn("title", normalize_udf("title"))
 
 def create_doc(row):
     filename = "data/" + sanitize_filename(str(row['id']) + "_" + row['title']).replace(" ", "_") + ".txt"

@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import pyspark
 import sys
 
@@ -21,12 +22,14 @@ def bm25_score(tf, df, dl, avg_dl, N, k1=1.0, b=0.75):
     return idf * (numerator / denominator)
 
 def main():
+    print("starting query.py")
     if len(sys.argv) < 2:
         sys.stderr.write("Usage: query.py 'query text'\n")
         sys.exit(1)
     query_text = sys.argv[1]
     query_terms = list(set(tokenize(query_text)))  # using unique terms
 
+    print("initializing Spark")
     # Initialize SparkSession with configuration to connect to Cassandra.
     spark = SparkSession.builder \
         .appName("BM25 Ranker") \
