@@ -1,34 +1,47 @@
-print("this is mapper 1")
-
-# !/usr/bin/env python3
+#!/usr/bin/python
 import sys
 import re
+import traceback
 
+try:
+    print("Запуск mapper1.py", file=sys.stderr)
 
-def tokenize(text):
-    # Simple tokenization: lower case and split by non-word characters.
-    return re.findall(r'\w+', text.lower())
+    def tokenize(text):
+        if not isinstance(text, str):
+            return []
+        return re.findall(r'\w+', text.lower())
 
+    def main():
+        for i, line in enumerate(sys.stdin):
+            try:
+                parts = line.strip().split("\t")
 
-def main():
-    for line in sys.stdin:
-        # Split the input line
-        parts = line.strip().split("\t")
-        if len(parts) < 3:
-            continue
-        doc_id, doc_title, doc_text = parts[0], parts[1], parts[2]
-        tokens = tokenize(doc_text)
-        doc_length = len(tokens)
+                # Добавляем диагностическую информацию
+                if i < 5:  # Выводим первые 5 строк для отладки
+                    print(f"Прочитана строка {i}: {parts[:2]}", file=sys.stderr)
 
-        # Emit document length statistic with a special key
-        # Use a prefix 'DOCLEN_' to distinguish from regular terms.
-        print(f'DOCLEN_{doc_id}\t{doc_length}')
+                if len(parts) < 3:
+                    print(f"Пропущена строка (недостаточно полей): {parts}", file=sys.stderr)
+                    continue
 
-        # Emit one record per token occurrence with key "term_docid"
-        for token in tokens:
-            # The composite key ensures that later reducer can group by (token, doc_id)
-            print(f'{token}::{doc_id}\t1')
+                doc_id, doc_title, doc_text = parts[0], parts[1], parts[2]
+                tokens = tokenize(doc_text)
+                doc_length = len(tokens)
 
+                print(f'DOCLEN_{doc_id}\t{doc_length}')
 
-if __name__ == '__main__':
-    main()
+                for token in tokens:
+                    print(f'{token}::{doc_id}\t1')
+            except Exception as e:
+                print(f"Ошибка при обработке строки {i}: {e}", file=sys.stderr)
+                print(traceback.format_exc(), file=sys.stderr)
+
+    if __name__ == '__main__':
+        main()
+
+except Exception as e:
+    # Записываем ошибку в stderr для отладки
+    print(f"Ошибка в mapper1.py: {e}", file=sys.stderr)
+    print(traceback.format_exc(), file=sys.stderr)
+    # Важно выйти с ненулевым кодом, чтобы Hadoop знал об ошибке
+    sys.exit(2)

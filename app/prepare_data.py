@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from pathvalidate import sanitize_filename
 from tqdm import tqdm
 from pyspark.sql import SparkSession
@@ -7,6 +8,11 @@ spark = SparkSession.builder \
     .appName('data preparation') \
     .master("local") \
     .config("spark.sql.parquet.enableVectorizedReader", "true") \
+    .config("spark.driver.memory", "8g") \
+    .config("spark.executor.memory", "8g") \
+    .config("spark.driver.maxResultSize", "4g") \
+    .config("spark.memory.offHeap.enabled", "true") \
+    .config("spark.memory.offHeap.size", "4g") \
     .getOrCreate()
 
 

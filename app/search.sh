@@ -1,9 +1,5 @@
 #!/bin/bash
 echo "This script will include commands to search for documents given the query using Spark RDD"
-#!/bin/bash
-# search.sh: Submit the BM25 Query Ranking application on a YARN cluster.
-# Usage: ./search.sh "your query string"
-# Check if the query argument is provided.
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 \"your query string\""
     exit 1
@@ -16,14 +12,12 @@ source .venv/bin/activate
 export PYSPARK_DRIVER_PYTHON=$(which python)
 export PYSPARK_PYTHON=./.venv/bin/python
 # Submit the Spark job in cluster mode on YARN.
-
 # Check if HDFS is in safe mode
 SAFEMODE_STATUS=$(hdfs dfsadmin -safemode get 2>/dev/null)
 if [[ $SAFEMODE_STATUS == *"ON"* ]]; then
     echo "HDFS is in safe mode. Forcing exit..."
     hdfs dfsadmin -safemode forceExit
 fi
-
 spark-submit \
     --master yarn \
     --deploy-mode cluster \
@@ -32,4 +26,3 @@ spark-submit \
     --conf spark.executorEnv.PYSPARK_PYTHON=./.venv/bin/python \
     --packages com.datastax.spark:spark-cassandra-connector_2.12:3.0.0 \
     query.py "$QUERY"
-

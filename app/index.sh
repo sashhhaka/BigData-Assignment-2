@@ -1,14 +1,12 @@
 #!/bin/bash
-#!/bin/bash
-# index.sh - Script to run the Hadoop MapReduce pipelines for indexing.
-# Usage: ./index.sh [input_path]
-# Default input_path is /index/data in HDFS if no argument is provided.
-#!/bin/bash
-# index.sh: Script to run Hadoop MapReduce pipelines for indexing.
-# Usage: ./index.sh [input_path]
-# If no input_path is provided, it defaults to /index/data in HDFS.
-# Set default input path from HDFS if not provided as argument.
+echo "Проверка окружения MapReduce:"
+echo "Python версия:"
+python3 --version
+echo "Содержимое папки mapreduce:"
+ls -la mapreduce/
 INPUT_PATH=${1:-/index/data}
+echo "Проверка доступности входных данных:"
+hdfs dfs -ls $INPUT_PATH | head -10
 # Define temporary output directories for the two pipelines.
 PIPELINE1_OUTPUT=/tmp/mapreduce_pipeline1_output
 PIPELINE2_OUTPUT=/tmp/mapreduce_pipeline2_output
@@ -19,23 +17,29 @@ hdfs dfs -ls /
 # Remove previous HDFS output directories (if any)
 hadoop fs -rm -r $PIPELINE1_OUTPUT 2>/dev/null
 hadoop fs -rm -r $PIPELINE2_OUTPUT 2>/dev/null
+chmod +x mapreduce/mapper1.py
+chmod +x mapreduce/reducer1.py
+chmod +x mapreduce/mapper2.py
+chmod +x mapreduce/reducer2.py
 echo "Running Pipeline 1: Aggregating term frequencies and document statistics..."
-hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-streaming.jar \
+hadoop jar /usr/local/hadoop/share/hadoop/tools/lib/hadoop-streaming-3.3.1.jar \
     -input $INPUT_PATH \
     -output $PIPELINE1_OUTPUT \
-    -mapper "python3 mapreduce/mapper1.py" \
-    -reducer "python3 mapreduce/reducer1.py" \
+    -mapper "python3 mapper1.py" \
+    -reducer "python3 reducer1.py" \
     -file mapreduce/mapper1.py \
     -file mapreduce/reducer1.py
 echo "Pipeline 1 completed. Output is stored in HDFS directory: $PIPELINE1_OUTPUT."
 echo "Running Pipeline 2: Calculating vocabulary document frequencies..."
-hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-streaming.jar \
+hadoop jar /usr/local/hadoop/share/hadoop/tools/lib/hadoop-streaming-3.3.1.jar \
     -input $PIPELINE1_OUTPUT \
     -output $PIPELINE2_OUTPUT \
-    -mapper "python3 mapreduce/mapper2.py" \
-    -reducer "python3 mapreduce/reducer2.py" \
+    -mapper "python3 mapper2.py" \
+    -reducer "python3 reducer2.py" \
     -file mapreduce/mapper2.py \
     -file mapreduce/reducer2.py
 echo "Pipeline 2 completed. Vocabulary output is stored in HDFS directory: $PIPELINE2_OUTPUT."
-echo "Indexing tasks complete. Verify results and check Cassandra tables for inserted data if using direct insertion."
-
+# Load MapReduce output into Cassandra using app.py
+echo "Loading MapReduce output into Cassandra..."
+python app.py load $PIPELINE1_OUTPUT $PIPELINE2_OUTPUT
+echo "Indexing tasks complete. Data has been loaded into Cassandra."
