@@ -28,16 +28,11 @@ def clean_text(text):
         return ""
     return re.sub(r'\s+', ' ', text).strip()
 
-def normalize_text(text):
-    if not text:
-        return text
-    return re.sub(r'\s+', ' ', text).strip()
-
 # Register the UDF
-normalize_udf = udf(clean_text, StringType())
+clean_udf = udf(clean_text, StringType())
 
 # Apply normalization to title column
-df = df.withColumn("title", normalize_udf("title"))
+df = df.withColumn("title", clean_udf("title"))
 
 def create_doc(row):
     filename = "data/" + sanitize_filename(str(row['id']) + "_" + row['title']).replace(" ", "_") + ".txt"

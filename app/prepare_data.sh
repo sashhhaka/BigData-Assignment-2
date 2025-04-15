@@ -1,8 +1,6 @@
 #!/bin/bash
 source .venv/bin/activate
-#export PYSPARK_SUBMIT_ARGS="--driver-memory 15g pyspark-shell"
 export PYSPARK_SUBMIT_ARGS="--driver-memory 8g --executor-memory 8g pyspark-shell"
-# Python of the driver (/app/.venv/bin/python)
 export PYSPARK_DRIVER_PYTHON=$(which python)
 unset PYSPARK_PYTHON
 # DOWNLOAD a.parquet or any parquet file before you run this

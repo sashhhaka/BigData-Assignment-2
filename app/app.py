@@ -14,10 +14,6 @@ def initialize_cassandra():
     cluster = Cluster(['cassandra-server'])
     session = cluster.connect()
 
-    # rows = session.execute('DESC keyspaces')
-    # for row in rows:
-    #     print(row)
-
     try:
         # Create keyspace if not exists
         session.execute("""
@@ -54,7 +50,7 @@ def initialize_cassandra():
 
         print("Cassandra schema initialized successfully")
 
-        # Display available keyspaces for verification
+        # available keyspaces for verification
         rows = session.execute('DESC keyspaces')
         print("Available keyspaces:")
         for row in rows:
@@ -73,14 +69,14 @@ def load_data_to_cassandra(session, pipeline1_output, pipeline2_output):
     print(f"Loading data from MapReduce outputs into Cassandra...")
 
     try:
-        # Create temporary directories for downloaded HDFS files
+        # temporary directories for downloaded HDFS files
         os.system("mkdir -p ./pipeline1_output ./pipeline2_output")
 
-        # Download files from HDFS
+        # download files from HDFS
         os.system(f"hdfs dfs -get {pipeline1_output}/part-* ./pipeline1_output/ 2>/dev/null")
         os.system(f"hdfs dfs -get {pipeline2_output}/part-* ./pipeline2_output/ 2>/dev/null")
 
-        # Process Pipeline 1 output (doc stats and inverted index)
+        # processing Pipeline 1 output
         doc_stats_count = 0
         inverted_index_count = 0
 
@@ -89,7 +85,7 @@ def load_data_to_cassandra(session, pipeline1_output, pipeline2_output):
                 for line in f:
                     parts = line.strip().split('\t')
                     if len(parts) == 2 and parts[0].startswith('DOCLEN_'):
-                        # Process document length
+                        # process document length
                         doc_id = parts[0].split('DOCLEN_')[1]
                         doc_length = int(parts[1])
                         session.execute(
@@ -98,7 +94,7 @@ def load_data_to_cassandra(session, pipeline1_output, pipeline2_output):
                         )
                         doc_stats_count += 1
                     elif len(parts) == 3:
-                        # Process term frequency
+                        # process term frequency
                         term, doc_id, tf = parts
                         session.execute(
                             "INSERT INTO inverted_index (term, doc_id, tf) VALUES (%s, %s, %s)",
@@ -106,7 +102,7 @@ def load_data_to_cassandra(session, pipeline1_output, pipeline2_output):
                         )
                         inverted_index_count += 1
 
-        # Process Pipeline 2 output (vocabulary)
+        # process Pipeline 2 output
         vocab_count = 0
         for filename in glob.glob('./pipeline2_output/part-*'):
             with open(filename, 'r') as f:
@@ -128,7 +124,7 @@ def load_data_to_cassandra(session, pipeline1_output, pipeline2_output):
     except Exception as e:
         print(f"Error loading data into Cassandra: {e}")
     finally:
-        # Clean up
+        # clean up
         os.system("rm -rf ./pipeline1_output ./pipeline2_output")
 
 
@@ -143,7 +139,7 @@ def verify_cassandra_tables(session):
             table_names.append(table.table_name)
             print(f"- {table.table_name}")
 
-        # Check that all required tables are created
+        # check that all required tables are created
         required_tables = ["inverted_index", "vocabulary", "doc_stats"]
         missing_tables = [t for t in required_tables if t not in table_names]
 
@@ -174,7 +170,6 @@ def main():
             finally:
                 cluster.shutdown()
     else:
-        # Just initialize the schema
         cluster, session = initialize_cassandra()
         if session:
             verify_cassandra_tables(session)

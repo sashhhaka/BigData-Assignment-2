@@ -16,8 +16,8 @@ try:
             try:
                 parts = line.strip().split("\t")
 
-                # Add diagnostic information
-                if i < 5:  # Output the first 5 lines for debugging
+                # diagnostic information
+                if i < 5:
                     print(f"Read line {i}: {parts[:2]}", file=sys.stderr)
 
                 if len(parts) < 3:
@@ -40,8 +40,6 @@ try:
         main()
 
 except Exception as e:
-    # Write error to stderr for debugging
     print(f"Error in mapper1.py: {e}", file=sys.stderr)
     print(traceback.format_exc(), file=sys.stderr)
-    # Exit with non-zero code so Hadoop knows there was an error
     sys.exit(2)
