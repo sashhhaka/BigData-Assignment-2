@@ -11,9 +11,9 @@ def tokenize(text):
 
 
 def bm25_score(tf, df, dl, avg_dl, N, k1=1.2, b=0.75):
-    # correct IDF formula for BM25
+    # IDF
     idf = math.log((N - df + 0.5) / (df + 0.5) + 1.0)
-    # TF saturation formula for BM25
+    # TF saturation
     numerator = tf * (k1 + 1)
     denominator = tf + k1 * ((1 - b) + b * (dl / avg_dl))
     return idf * (numerator / denominator)

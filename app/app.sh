@@ -17,4 +17,4 @@ venv-pack -o .venv.tar.gz
 # Run the indexer
 #bash index.sh "/index/data"
 # Run the ranker
-bash search.sh "this is a query!"
+bash search.sh "frog princess"
