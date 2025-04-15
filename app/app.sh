@@ -11,10 +11,10 @@ pip install -r requirements.txt
 # Package the virtual env.
 venv-pack -o .venv.tar.gz
 # Init Cassandra
-#python app.py
+python app.py
 # Collect data
-#bash prepare_data.sh
+bash prepare_data.sh
 # Run the indexer
-#bash index.sh "/index/data"
+bash index.sh "/index/data"
 # Run the ranker
 bash search.sh "frog princess"
