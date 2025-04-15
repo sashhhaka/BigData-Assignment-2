@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 
+
 def main():
     current_key = None
     current_count = 0
@@ -41,6 +42,7 @@ def main():
                 print(f'{term}\t{doc_id}\t{current_count}')
             except ValueError:
                 pass
+
 
 if __name__ == '__main__':
     main()

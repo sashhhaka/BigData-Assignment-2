@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 
+
 def main():
     current_term = None
     current_df = 0
@@ -21,6 +22,7 @@ def main():
 
     if current_term:
         print(f'{current_term}\t{current_df}')
+
 
 if __name__ == '__main__':
     main()

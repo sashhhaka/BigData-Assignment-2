@@ -6,10 +6,12 @@ import traceback
 try:
     print("Starting mapper1.py", file=sys.stderr)
 
+
     def tokenize(text):
         if not isinstance(text, str):
             return []
         return re.findall(r'\w+', text.lower())
+
 
     def main():
         for i, line in enumerate(sys.stdin):
@@ -35,6 +37,7 @@ try:
             except Exception as e:
                 print(f"Error processing line {i}: {e}", file=sys.stderr)
                 print(traceback.format_exc(), file=sys.stderr)
+
 
     if __name__ == '__main__':
         main()

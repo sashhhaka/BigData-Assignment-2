@@ -5,8 +5,10 @@ import re
 from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
 
+
 def tokenize(text):
     return re.findall(r'\w+', text.lower())
+
 
 def bm25_score(tf, df, dl, avg_dl, N, k1=1.2, b=0.75):
     # correct IDF formula for BM25
@@ -15,6 +17,7 @@ def bm25_score(tf, df, dl, avg_dl, N, k1=1.2, b=0.75):
     numerator = tf * (k1 + 1)
     denominator = tf + k1 * ((1 - b) + b * (dl / avg_dl))
     return idf * (numerator / denominator)
+
 
 def main():
     if len(sys.argv) < 2:
@@ -100,6 +103,7 @@ def main():
         print(f"ID: {doc_id}, Title: {title}, BM25: {score:.4f}")
 
     spark.stop()
+
 
 if __name__ == '__main__':
     main()
